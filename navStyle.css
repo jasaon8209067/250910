@@ -1,0 +1,65 @@
+.navBar {
+    list-style-type: none;
+    /*取消項目符號*/
+    text-align: center;
+    /*文字置中*/
+    display: flex;
+    /* 使用 Flexbox 來水平排列 */
+    justify-content: center;
+    /* 水平置中選單 */
+    background-color: darkgoldenrod;
+    margin: 0;
+    padding: 0;
+}
+
+.navBar li {
+    display: inline-block;
+    padding: 10px;
+}
+
+.navBar li:hover {
+    background-color: goldenrod;
+}
+
+.navBar li a {
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    /*取消超連結底線*/
+}
+
+
+nav {
+    position: fixed;
+    /* 固定位置 */
+    top: 0;
+    /* 頁面最上方 */
+    left: 0;
+    /* 靠左 */
+    width: 100%;
+    /* 佔滿整個寬度 */
+    background-color: rgb(60, 52, 106);
+    /* 導覽列背景，避免透明 */
+    padding: 0;
+    /* 上下留點間距 */
+}
+
+.table td,
+.table th {
+    vertical-align: middle !important;
+    /* 垂直置中 */
+    text-align: center;
+    /* 水平置中 */
+}
+
+.body {
+    background-color: rgb(60, 52, 106);
+    font-family: Arial, sans-serif;
+    display: grid;
+    place-items: center;
+    /* 水平+垂直置中 */
+    height: 100vh;
+    margin: 0;
+
+}
+

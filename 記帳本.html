@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <link rel="stylesheet" href="./navStyle.css"> -->
+    <title>小專案_記帳本</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <style>
+        body {
+            background-color: rgb(60, 52, 106);
+            font-family: Arial, sans-serif;
+            display: grid;
+            place-items: center;
+            /* 水平+垂直置中 */
+            height: 100vh;
+            margin: 0;
+
+        }
+
+        label {
+            display: inline-block;
+            margin-top: 12px;
+            font-weight: bold;
+            color: rgb(35, 168, 104);
+        }
+
+        input,
+        select {
+            margin: 5px 0;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            border: none;
+            background-color: darkgoldenrod;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: goldenrod;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle;
+            white-space: nowrap;
+            /* 文字不換行 */
+            text-align: center;
+            /* 水平置中 */
+        }
+
+        .form-container {
+            width: 450px;
+            /* 固定寬度，不會縮放 */
+            margin: 0 auto;
+            /* 水平置中 */
+        }
+
+        .sort-arrow {
+            font-size: 12px;
+            margin-left: 4px;
+            color: #ffcc00;
+            /* 亮黃色箭頭 */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 固定在上方的導覽列 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-warning fixed-top shadow">
+        <div class="container-fluid d-flex justify-content-center">
+            <a class="navbar-brand fs-2 fw-bold text-dark" href="#">
+                <i class="bi bi-cash-coin"></i> 記帳本 <i class="bi bi-piggy-bank-fill"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- 主內容 -->
+    <div class="container" style="margin-top:120px;">
+        <!-- 支出/收入總攬 -->
+        <div class="row mb-4">
+            <div class="col-12 mb-3">
+                <div class="card text-white bg-info h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">總資產</h5>
+                        <p class="card-text fs-3" id="total_assets">$0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">總收入</h5>
+                        <p class="card-text fs-3" id="totalIncome">$0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+                <div class="card text-white bg-danger h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">總支出</h5>
+                        <p class="card-text fs-3" id="totalExpense">$0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 表單區 -->
+        <div class="form-container p-4 rounded">
+            <form class="text-light">
+                <label for="date">日期:</label>
+                <input id="date" type="date" class="form-control mb-2">
+
+                <label>總類:</label><br>
+                <label class="me-3"><input type="radio" name="type" value="expense" required> 支出</label>
+                <label><input type="radio" name="type" value="income" required> 收入</label><br>
+
+                <label for="item">項目:</label>
+                <select id="item" class="form-select mb-2">
+                    <optgroup label="支出項目">
+                        <option value="food">伙食</option>
+                        <option value="clothes">治裝</option>
+                        <option value="rent">房租</option>
+                        <option value="transport">交通</option>
+                        <option value="entertainment">娛樂</option>
+                        <option value="Investment">投資</option>
+                        <option value="Other_expenses">其他支出</option>
+                    </optgroup>
+                    <optgroup label="收入項目">
+                        <option value="salary">薪水</option>
+                        <option value="bonus">獎金</option>
+                        <option value="Investment_income">投資收益</option>
+                        <option value="Other_income">其他收入</option>
+                    </optgroup>
+                </select>
+
+                <label for="amount">金額:</label>
+                <input id="amount" type="number" min="1" step="1" class="form-control mb-2">
+
+                <label for="note">備註:</label>
+                <input id="note" type="text" class="form-control mb-3">
+
+                <button type="submit" class="btn btn-warning me-2">新增記錄</button>
+                <button type="reset" class="btn btn-secondary">清除重填</button>
+            </form>
+        </div>
+
+
+        <!-- 記帳清單 -->
+        <div class="text-center">
+            <h2 class="text-light mt-4">紀錄清單</h2>
+            <table class="table table-hover table-striped text-center">
+                <thead>
+                    <tr>
+                        <th id="sort-date" style="cursor:pointer">日期 <span id="arrow-date">⬍</span></th>
+                        <th id="sort-type" style="cursor:pointer">總類 <span id="arrow-type">⬍</span></th>
+                        <th>項目</th>
+                        <th id="sort-amount" style="cursor:pointer">金額 <span id="arrow-amount">⬍</span></th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <!-- 分頁按鈕容器 -->
+            <div class="d-flex justify-content-center my-3" id="pagination"></div>
+            <!-- 分頁按鈕
+            <div class="d-flex justify-content-center my-3">
+                <div class="btn-group">
+                    <button class="btn btn-warning">1</button>
+                    <button class="btn btn-warning">2</button>
+                    <button class="btn btn-warning">3</button>
+                </div>
+            </div> -->
+        </div>
+    </div>
+    </div>
+    </div>
+    <!-- 編輯對話框-暫時拔除
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title fw-bold" id="editModalLabel">編輯紀錄</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="edit-date" class="form-label">日期</label>
+                            <input type="date" class="form-control" id="edit-date">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">總類</label><br>
+                            <input type="radio" name="edit-type" value="expense"> 支出
+                            <input type="radio" name="edit-type" value="income" class="ms-3"> 收入
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-item" class="form-label">項目</label>
+                            <input type="text" class="form-control" id="edit-item">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-amount" class="form-label">金額</label>
+                            <input type="number" class="form-control" id="edit-amount">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-note" class="form-label">備註</label>
+                            <input type="text" class="form-control" id="edit-note">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-warning">儲存變更</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- 刪除確認對話框 -->
+    <!-- <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">刪除確認</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    你確定要刪除此筆紀錄嗎？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger">確定刪除</button>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Toast 容器 -->
+    <!-- 新增成功 Toast -->
+    <div class="position-fixed top-0 end-0 p-3" style="z-index: 1055">
+        <div id="toastSuccess" class="toast align-items-center text-bg-success border-0 w-auto" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">新增成功！</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+
+        <!-- 警告 Toast -->
+        <div class="toast align-items-center text-bg-primary border-0 w-auto" id="toastWarning" role="alert"
+            aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    請完整填寫的「日期 / 類別 / 項目 / 金額」！
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+
+        <!-- 刪除成功 Toast -->
+        <div id="toastDelete" class="toast align-items-center text-bg-danger border-0 mt-2 w-auto" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">刪除成功！</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Bootstrap JS -->
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // 取得 Toast 元素
+            const toastSuccess = new bootstrap.Toast(document.getElementById("toastSuccess"));
+            const toastDelete = new bootstrap.Toast(document.getElementById("toastDelete"));
+            const toastWarning = new bootstrap.Toast(document.getElementById("toastWarning"));
+
+            // LocalStorage key
+            const STORAGE_KEY = "records";
+
+            // 排序狀態
+            let sortConfig = { key: null, order: "asc" }; // order: "asc" | "desc"
+
+            // 排序函數
+            function sortRecords(records) {
+                if (!sortConfig.key) return records;
+
+                return [...records].sort((a, b) => {
+                    let valA, valB;
+
+                    if (sortConfig.key === "date") {
+                        valA = new Date(a.date);
+                        valB = new Date(b.date);
+                    } else if (sortConfig.key === "type") {
+                        // 支出排前面、收入排後面
+                        valA = a.type === "expense" ? 0 : 1;
+                        valB = b.type === "expense" ? 0 : 1;
+                    } else if (sortConfig.key === "amount") {
+                        valA = Number(a.amount);
+                        valB = Number(b.amount);
+                    }
+
+                    if (valA < valB) return sortConfig.order === "asc" ? -1 : 1;
+                    if (valA > valB) return sortConfig.order === "asc" ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            // 綁定排序清單事件
+            document.querySelector("#sort-date").addEventListener("click", () => toggleSort("date"));
+            document.querySelector("#sort-type").addEventListener("click", () => toggleSort("type"));
+            document.querySelector("#sort-amount").addEventListener("click", () => toggleSort("amount"));
+
+            // 更新箭頭 UI
+            // document.querySelectorAll("th .sort-arrow").forEach(span => span.textContent = "");
+            // const activeTh = document.querySelector(`#sort-${sortConfig.key} .sort-arrow`);
+            // if (activeTh) activeTh.textContent = sortConfig.order === "asc" ? "↑" : "↓";
+
+            // 切換排序狀態
+            function toggleSort(key) {
+                if (sortConfig.key === key) {
+                    // 同一欄位 → 切換升/降冪
+                    sortConfig.order = sortConfig.order === "asc" ? "desc" : "asc";
+                } else {
+                    // 換新欄位 → 預設升冪
+                    sortConfig.key = key;
+                    sortConfig.order = "asc";
+                }
+                currentPage = 1; // 點擊排序回到第 1 頁
+                loadRecords(currentPage);
+            }
+
+            // 分頁設定
+            const ROWS_PER_PAGE = 5; // 每頁幾筆
+            let currentPage = 1;
+
+            // 載入紀錄並更新表格 & 總收入/支出
+            function loadRecords(page = 1) {
+                let records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+                // 排序處理
+                records = sortRecords(records);
+
+                const recordList = document.querySelector("table tbody");
+                recordList.innerHTML = ""; // 先清空
+
+                let totalIncome = 0;
+                let totalExpense = 0;
+
+                // 計算收入支出
+                records.forEach(record => {
+                    if (record.type === "income") {
+                        totalIncome += Number(record.amount);
+                    } else {
+                        totalExpense += Number(record.amount);
+                    }
+                });
+
+                // 分頁計算
+                const start = (page - 1) * ROWS_PER_PAGE;
+                const end = start + ROWS_PER_PAGE;
+                const pageRecords = records.slice(start, end);
+
+                // 渲染該頁的紀錄
+                pageRecords.forEach((record, index) => {
+                    const newRow = document.createElement("tr");
+                    newRow.innerHTML = `
+                <td>${record.date}</td>
+                <td>${record.type === "expense" ? "支出" : "收入"}</td>
+                <td>${record.itemName}</td>
+                <td>$${record.amount}</td>
+                <td>${record.note || "-"}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" data-index="${start + index}">刪除</button>
+                </td>
+            `;
+                    recordList.appendChild(newRow);
+                });
+
+                // 更新總收入支出
+                document.querySelector("#totalIncome").textContent = `$${totalIncome.toLocaleString()}`;
+                document.querySelector("#totalExpense").textContent = `$${totalExpense.toLocaleString()}`;
+
+                let assets = totalIncome - totalExpense;
+                document.querySelector("#total_assets").textContent =
+                    assets < 0 ? `-$${Math.abs(assets).toLocaleString()}` : `$${assets.toLocaleString()}`;
+
+                // 呼叫分頁渲染
+                renderPagination(records.length, page);
+            }
+
+            // 分頁按鈕渲染 (含上一頁 / 下一頁)
+            function renderPagination(totalRecords, page) {
+                const paginationContainer = document.getElementById("pagination");
+                paginationContainer.innerHTML = "";
+
+                const totalPages = Math.ceil(totalRecords / ROWS_PER_PAGE);
+                if (totalPages <= 1) return; // 只有一頁就不顯示
+
+                // 上一頁
+                const prevBtn = document.createElement("button");
+                prevBtn.className = "btn btn-outline-warning mx-1";
+                prevBtn.textContent = "«";
+                prevBtn.disabled = page === 1;
+                prevBtn.addEventListener("click", () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        loadRecords(currentPage);
+                    }
+                });
+                paginationContainer.appendChild(prevBtn);
+
+                // 頁碼按鈕
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement("button");
+                    btn.className = `btn btn-warning mx-1 ${i === page ? "active" : ""}`;
+                    btn.textContent = i;
+                    btn.addEventListener("click", () => {
+                        currentPage = i;
+                        loadRecords(currentPage);
+                    });
+                    paginationContainer.appendChild(btn);
+                }
+
+                // 下一頁
+                const nextBtn = document.createElement("button");
+                nextBtn.className = "btn btn-outline-warning mx-1";
+                nextBtn.textContent = "»";
+                nextBtn.disabled = page === totalPages;
+                nextBtn.addEventListener("click", () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        loadRecords(currentPage);
+                    }
+                });
+                paginationContainer.appendChild(nextBtn);
+            }
+
+            // 儲存紀錄到 localStorage
+            function saveRecord(record) {
+                const records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                records.unshift(record);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+            }
+
+            // 刪除紀錄
+            function deleteRecord(index) {
+                const records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+                records.splice(index, 1); // 移除指定項目
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+                loadRecords(currentPage); // 保持在當前頁
+                toastDelete.show();
+            }
+
+            // 點擊刪除按鈕事件
+            document.addEventListener("click", (e) => {
+                if (e.target.matches("button.btn-danger[data-index]")) {
+                    const index = e.target.getAttribute("data-index");
+                    if (confirm("確定要刪除這筆紀錄嗎？")) {
+                        deleteRecord(index);
+                    }
+                    }
+                });
+
+            // 表單提交事件
+            const form = document.querySelector("form");
+            form.addEventListener("submit", (e) => {
+                e.preventDefault(); // 阻止表單送出
+
+                const date = document.getElementById("date").value.trim();
+                const type = form.querySelector("input[name='type']:checked"); // 取得選中的收入/支出
+                const item = document.getElementById("item").value.trim();
+                let amount = document.getElementById("amount").value.trim();
+                amount = parseInt(amount, 10); // 轉成整數
+                const note = document.getElementById("note").value.trim();
+
+                const itemNameMapping = {
+                    "food": "飲食",
+                    "clothes": "治裝",
+                    "rent": "房租",
+                    "transport": "交通",
+                    "entertainment": "娛樂",
+                    "Other_expenses": "其他支出",
+                    "salary": "薪水",
+                    "bonus": "獎金",
+                    "Investment": "投資",
+                    "Investment_income": "投資收益",
+                    "Other_income": "其他收入"
+                };
+                const itemName = itemNameMapping[item] || item;
+
+                // 驗證：日期、總類、項目、金額 必填
+                if (!date || !type || !item || !amount) {
+                    toastWarning.show();
+                    return;
+                }
+
+                const newRecord = {
+                    date,
+                    type: type.value,
+                    item,
+                    itemName,
+                    amount,
+                    note
+                };
+
+                // 儲存到 localStorage
+                saveRecord(newRecord);
+
+                // 重新渲染表格 & 更新總收入/支出
+                loadRecords(currentPage);
+
+                toastSuccess.show();
+                form.reset();
+            });
+
+            // 頁面加載時先讀取 localStorage
+            loadRecords(currentPage);
+        });
+    </script>
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
